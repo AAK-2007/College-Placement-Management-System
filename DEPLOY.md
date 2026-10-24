@@ -61,7 +61,7 @@ Copy the long value after `OFFICER_PASSWORD_HASH=` (it starts with `$2a$10$`).
 2. **New** → **Web Service** → **Public Git Repository**, and paste the repository address
    (for example `https://github.com/AAK-2007/College-Placement-Management-System`) → **Connect**.
 3. Fill in:
-   - **Branch:** `Web-Version` (the branch that contains this web app)
+   - **Branch:** `Live-Deploy` (the branch that contains this web app and its `Dockerfile`)
    - **Root Directory:** leave empty if this web app is at the top of the branch; otherwise the folder name, e.g. `placement-web`
    - **Language / Runtime:** **Docker** (Render detects the `Dockerfile`)
    - **Instance Type:** **Free**
@@ -85,7 +85,7 @@ Copy the long value after `OFFICER_PASSWORD_HASH=` (it starts with `$2a$10$`).
 3. Log in as `officer` with the password from step 3. Students and companies can now sign up
    from the home page.
 
-Every later `git push` to the `Web-Version` branch redeploys the site automatically.
+Every later `git push` to the `Live-Deploy` branch redeploys the site automatically.
 
 ---
 
@@ -112,7 +112,7 @@ docker run -p 8080:8080 -e DB_URL="jdbc:mysql://..." -e DB_USER=... -e DB_PASSWO
 
 | Problem | Fix |
 |---|---|
-| Build fails on Render | Check **Branch** is `Web-Version` and **Runtime** is Docker; the `Dockerfile` must be in the folder Render builds (see Root Directory). |
+| Build fails on Render | Check **Branch** is `Live-Deploy` and **Runtime** is Docker; the `Dockerfile` must be in the folder Render builds (see Root Directory). |
 | Dashboard says "MySQL rejected the user name or password" | `DB_USER` / `DB_PASSWORD` do not match Aiven's connection information. |
 | "The placement_system database does not exist yet" | Step 2 was not run (or ran against another server). |
 | "Could not connect to the database" | Wrong host or port in `DB_URL`, the Aiven service is powered off, or `sslMode=REQUIRED` is missing. |
