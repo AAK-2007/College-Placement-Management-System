@@ -73,7 +73,14 @@ Copy the long value after `OFFICER_PASSWORD_HASH=` (it starts with `$2a$10$`).
    | `DB_USER` | `avnadmin` |
    | `DB_PASSWORD` | the Aiven password |
    | `OFFICER_PASSWORD_HASH` | the hash from step 3 |
-   | `SPRING_DATASOURCE_HIKARI_MAXIMUM_POOL_SIZE` | `5` (keeps within the free database's connection limit) |
+   | `SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE` | `5` (keeps within the free database's connection limit) |
+   | `SPRING_DATASOURCE_HIKARI_CONNECTIONTIMEOUT` | `60000` (the free server is slow; allows 60 s to connect) |
+   | `SPRING_SQL_INIT_MODE` | `never` (the tables already exist from step 2; the app starts without waiting for the database) |
+
+   Write the last three names exactly like this, **without underscores inside `MAXIMUMPOOLSIZE`
+   and `CONNECTIONTIMEOUT`**. With extra underscores (e.g. `CONNECTION_TIMEOUT`) Spring reads part of
+   the name as the pool's `connection` property, opens the pool too early and fails to start with
+   "The configuration of the pool is sealed once started".
 
    Do not set `PORT`: Render provides it, and the app uses it automatically.
 5. **Create Web Service**. The first build takes 5–10 minutes.
@@ -118,3 +125,5 @@ docker run -p 8080:8080 -e DB_URL="jdbc:mysql://..." -e DB_USER=... -e DB_PASSWO
 | "Could not connect to the database" | Wrong host or port in `DB_URL`, the Aiven service is powered off, or `sslMode=REQUIRED` is missing. |
 | Officer login fails | `OFFICER_PASSWORD_HASH` must be the whole hash, starting with `$2a$10$`, with no spaces. |
 | First page takes about a minute | Normal on the free plan: the app was asleep. |
+| "Communications link failure … Connection attempt exceeded defined timeout" | The connection to Aiven is slower than allowed; set `SPRING_DATASOURCE_HIKARI_CONNECTIONTIMEOUT` = `60000`. |
+| "Could not bind properties … pool is sealed once started" | A Hikari variable name has underscores inside it; use `SPRING_DATASOURCE_HIKARI_CONNECTIONTIMEOUT` and `SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE`. |
