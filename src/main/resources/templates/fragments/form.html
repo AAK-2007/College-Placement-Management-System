@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!--
+  One labelled text input bound to a field of the surrounding th:object form.
+  name: form field name; label: shown label; required: true/false;
+  placeholder: hint text (on edit pages, the current value); help: small text under the field (or null).
+  Shows the validator's message for this field from the "errors" map.
+-->
+<div th:fragment="input(name, label, required, placeholder, help)" class="mb-3">
+    <label th:for="${name}" class="form-label">
+        <span th:text="${label}">Label</span><span th:if="${required}" class="text-danger"> *</span>
+    </label>
+    <input type="text" class="form-control" th:field="*{__${name}__}"
+           th:placeholder="${placeholder}"
+           th:classappend="${errors?.containsKey(name)} ? 'is-invalid'">
+    <div class="invalid-feedback" th:if="${errors?.containsKey(name)}" th:text="${errors.get(name)}">Error</div>
+    <div class="form-text" th:if="${help}" th:text="${help}">Help</div>
+</div>
+
+<!-- Password input. Deliberately not bound with th:field, so a typed password is never sent back to the page. -->
+<div th:fragment="password(name, label, help)" class="mb-3">
+    <label th:for="${name}" class="form-label">
+        <span th:text="${label}">Password</span><span class="text-danger"> *</span>
+    </label>
+    <input type="password" class="form-control" th:id="${name}" th:name="${name}" autocomplete="new-password"
+           th:classappend="${errors?.containsKey(name)} ? 'is-invalid'">
+    <div class="invalid-feedback" th:if="${errors?.containsKey(name)}" th:text="${errors.get(name)}">Error</div>
+    <div class="form-text" th:if="${help}" th:text="${help}">Help</div>
+</div>
+
+</body>
+</html>

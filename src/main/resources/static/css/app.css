@@ -1,0 +1,290 @@
+/*
+ * Placement Management System - site theme on top of Bootstrap 5.
+ * Plain, institutional look: navy and white, a serif for headings, thin borders.
+ */
+
+:root {
+    --brand: #1f3a5f;          /* navy */
+    --brand-dark: #152a46;
+    --brand-light: #e9eef5;
+    --accent: #b08d3c;         /* muted gold, used sparingly */
+    --page-bg: #f4f5f7;
+    --line: #dde2e8;
+    --text: #1f2933;
+    --muted: #5f6b7a;
+
+    --bs-body-font-family: "Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --bs-body-color: var(--text);
+    --bs-body-bg: var(--page-bg);
+    --bs-primary: var(--brand);
+    --bs-primary-rgb: 31, 58, 95;
+    --bs-link-color-rgb: 31, 58, 95;
+    --bs-link-hover-color-rgb: 21, 42, 70;
+    --bs-border-color: var(--line);
+    --bs-border-radius: .25rem;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: var(--page-bg);
+}
+
+body > main {
+    flex: 1 0 auto;
+    padding-top: 1.75rem;
+    padding-bottom: 3rem;
+}
+
+h1, h2, .h1, .h2, .h3, .h4, .brand-name, .serif {
+    font-family: "Source Serif 4", Georgia, "Times New Roman", serif;
+    color: var(--brand);
+}
+
+main h1, main .h3:first-of-type {
+    font-weight: 700;
+}
+
+main h2.h5, main h2.h6 {
+    font-family: "Source Sans 3", "Segoe UI", sans-serif;
+    font-weight: 700;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-size: .85rem;
+}
+
+/* ---------- Header ---------- */
+
+.site-header {
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+}
+
+.brand-bar {
+    padding: .85rem 0;
+    border-top: 4px solid var(--brand);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    text-decoration: none;
+    color: var(--brand);
+}
+
+.brand-emblem {
+    width: 44px;
+    height: 44px;
+    flex: none;
+    color: var(--brand);
+}
+
+.brand-name {
+    display: block;
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.brand-sub {
+    display: block;
+    font-size: .8rem;
+    color: var(--muted);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.brand-bar .btn {
+    white-space: nowrap;
+}
+
+@media (max-width: 575.98px) {
+    .brand-name {
+        font-size: 1.05rem;
+    }
+
+    .brand-emblem {
+        width: 36px;
+        height: 36px;
+    }
+}
+
+.user-name {
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.user-role {
+    font-size: .8rem;
+    color: var(--muted);
+}
+
+.main-nav {
+    background: var(--brand);
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.main-nav .nav-link {
+    color: rgba(255, 255, 255, .85);
+    padding: .8rem 1rem !important;
+    border-bottom: 3px solid transparent;
+    font-weight: 600;
+}
+
+.main-nav .nav-link:hover,
+.main-nav .nav-link:focus {
+    color: #fff;
+    background: rgba(255, 255, 255, .06);
+}
+
+.main-nav .nav-link.active {
+    color: #fff;
+    border-bottom-color: var(--accent);
+}
+
+/* ---------- Footer ---------- */
+
+.site-footer {
+    flex-shrink: 0;
+    background: var(--brand-dark);
+    color: rgba(255, 255, 255, .75);
+    font-size: .875rem;
+    padding: 1.25rem 0;
+    margin-top: 2rem;
+}
+
+/* ---------- Buttons ---------- */
+
+.btn-primary {
+    --bs-btn-bg: var(--brand);
+    --bs-btn-border-color: var(--brand);
+    --bs-btn-hover-bg: var(--brand-dark);
+    --bs-btn-hover-border-color: var(--brand-dark);
+    --bs-btn-active-bg: var(--brand-dark);
+    --bs-btn-active-border-color: var(--brand-dark);
+    --bs-btn-disabled-bg: var(--brand);
+    --bs-btn-disabled-border-color: var(--brand);
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--brand);
+    --bs-btn-border-color: var(--brand);
+    --bs-btn-hover-bg: var(--brand);
+    --bs-btn-hover-border-color: var(--brand);
+    --bs-btn-active-bg: var(--brand-dark);
+    --bs-btn-active-border-color: var(--brand-dark);
+}
+
+.btn {
+    font-weight: 600;
+}
+
+/* ---------- Cards, tables, forms ---------- */
+
+.card {
+    border: 1px solid var(--line);
+    border-radius: .25rem;
+    box-shadow: none;
+}
+
+.card-header {
+    background: #fff;
+    font-weight: 700;
+    color: var(--brand);
+    border-bottom: 1px solid var(--line);
+}
+
+.table-responsive {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: .25rem;
+    margin-bottom: 1rem;
+}
+
+.table-responsive > .table {
+    margin-bottom: 0;
+}
+
+.table td, .table th {
+    vertical-align: middle;
+}
+
+.table > thead.table-light th,
+.table > thead th {
+    background: var(--brand-light);
+    color: var(--brand);
+    font-size: .8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    border-bottom: 1px solid var(--line);
+}
+
+.form-label {
+    font-weight: 600;
+}
+
+.nav-tabs .nav-link.active {
+    color: var(--brand);
+    font-weight: 600;
+    border-top: 3px solid var(--brand);
+}
+
+/* ---------- Dashboard figures ---------- */
+
+.stat-card .display-6 {
+    font-family: "Source Serif 4", Georgia, serif;
+    font-weight: 700;
+    color: var(--brand);
+}
+
+.stat-card {
+    border-top: 3px solid var(--brand) !important;
+}
+
+/* ---------- Public pages (welcome, login, sign up) ---------- */
+
+.hero {
+    background: var(--brand);
+    color: #fff;
+    padding: 3rem 0 2.5rem;
+    margin-top: -1.75rem;
+    margin-bottom: 2rem;
+}
+
+.hero h1 {
+    color: #fff;
+    font-size: 2.1rem;
+}
+
+.hero p {
+    color: rgba(255, 255, 255, .85);
+    max-width: 44rem;
+    font-size: 1.1rem;
+}
+
+.role-card h2 {
+    font-family: "Source Serif 4", Georgia, serif;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 1.25rem;
+    color: var(--brand);
+}
+
+.role-card ul {
+    padding-left: 1.1rem;
+    color: var(--muted);
+}
+
+.auth-card {
+    max-width: 30rem;
+    margin: 0 auto;
+}
+
+.section-note {
+    color: var(--muted);
+}

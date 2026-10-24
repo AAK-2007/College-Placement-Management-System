@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Error')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <h1 class="h3 mb-3">Something went wrong</h1>
+    <!-- "message" is set by GlobalExceptionHandler; "status" by Spring's error page for 404/403/500. -->
+    <div class="alert alert-danger"
+         th:text="${message != null and !#strings.isEmpty(message)} ? ${message}
+                  : (${status == 404} ? 'That page does not exist.'
+                  : (${status == 403} ? 'You are not allowed to do that. Try reloading the page.'
+                  : 'An unexpected error occurred. Please try again.'))">Message</div>
+    <a th:href="@{/}" class="btn btn-primary">Back to dashboard</a>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

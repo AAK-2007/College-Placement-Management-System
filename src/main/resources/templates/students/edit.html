@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Edit student')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <h1 class="h3 mb-1">Edit student</h1>
+    <p class="text-muted">
+        <span th:text="${student.name}">Name</span>
+        (register number <span th:text="${student.registerNumber}">REG</span>, ID <span th:text="${student.studentId}">1</span>).
+        Leave a field empty to keep the current value shown in grey.
+    </p>
+
+    <form th:action="@{/students/{id}/edit(id=${student.studentId})}" th:object="${form}" method="post"
+          class="card card-body" novalidate>
+        <div class="row">
+            <div class="col-md-6" th:insert="~{fragments/form :: input('name', 'Name', false, ${student.name}, null)}"></div>
+            <div class="col-md-6" th:insert="~{fragments/form :: input('department', 'Department', false, ${student.department}, null)}"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-3" th:insert="~{fragments/form :: input('cgpa', 'CGPA (0 - 10)', false, ${#numbers.formatDecimal(student.cgpa, 1, 2)}, null)}"></div>
+            <div class="col-md-3" th:insert="~{fragments/form :: input('backlogs', 'Backlogs', false, ${student.backlogs}, null)}"></div>
+            <div class="col-md-6" th:insert="~{fragments/form :: input('skills', 'Skills', false, ${student.skills}, 'Comma-separated.')}"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-6" th:insert="~{fragments/form :: input('email', 'Email', false, ${student.email}, null)}"></div>
+            <div class="col-md-6" th:insert="~{fragments/form :: input('phone', 'Phone', false, ${student.phone}, null)}"></div>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+            <a th:href="@{/students}" class="btn btn-link">Cancel</a>
+        </div>
+    </form>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

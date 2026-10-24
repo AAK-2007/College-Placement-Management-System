@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Apply for a job')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: navbar}"></header>
+<main class="container">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <h1 class="h3 mb-1" sec:authorize="hasRole('STUDENT')">Apply for a job</h1>
+    <h1 class="h3 mb-1" sec:authorize="hasRole('OFFICER')">New application</h1>
+    <p class="section-note" sec:authorize="hasRole('STUDENT')">
+        You can apply once per job, and only to jobs whose criteria you meet.
+        Not sure? <a th:href="@{/eligibility/student}">See the jobs you are eligible for</a>.
+    </p>
+    <p class="section-note" sec:authorize="hasRole('OFFICER')">
+        The student must not have applied already and must be eligible for the job.
+    </p>
+
+    <form th:action="@{/applications/apply}" method="post" class="card card-body">
+        <div class="row g-3 mb-3">
+            <!-- Only the officer chooses the student; a student always applies for themselves. -->
+            <div class="col-md-6" sec:authorize="hasRole('OFFICER')">
+                <label for="studentId" class="form-label">Student<span class="text-danger"> *</span></label>
+                <select id="studentId" name="studentId" class="form-select" required>
+                    <option value="">Choose a student</option>
+                    <option th:each="s : ${students}" th:value="${s.studentId}"
+                            th:text="${s.name + ' (' + s.registerNumber + ', ' + s.department + ')'}"
+                            th:selected="${s.studentId == selectedStudentId}">Student</option>
+                </select>
+            </div>
+            <div class="col-md-6">
+                <label for="jobId" class="form-label">Job<span class="text-danger"> *</span></label>
+                <select id="jobId" name="jobId" class="form-select" required>
+                    <option value="">Choose a job</option>
+                    <option th:each="j : ${jobs}" th:value="${j.jobId}"
+                            th:text="${companyNames[j.companyId] + ' - ' + j.role + ' (' + #numbers.formatDecimal(j.packageLpa, 1, 2) + ' LPA)'}"
+                            th:selected="${j.jobId == selectedJobId}">Job</option>
+                </select>
+            </div>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary">Apply</button>
+            <a th:href="@{/applications}" class="btn btn-link">Cancel</a>
+        </div>
+    </form>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

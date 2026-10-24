@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Company registration')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: navbar}"></header>
+<main class="container">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <h1 class="h3 mb-1">Company registration</h1>
+    <p class="section-note">Register your company to post job openings and interview applicants. Fields marked * are required.</p>
+
+    <form th:action="@{/register/company}" th:object="${form}" method="post" novalidate>
+        <div class="card mb-3">
+            <div class="card-header">Login details</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4" th:insert="~{fragments/form :: input('username', 'User name', true, 'e.g. nimbus-hr', 'Letters, digits, dots, dashes or underscores.')}"></div>
+                    <div class="col-md-4" th:insert="~{fragments/form :: password('password', 'Password', 'At least 8 characters.')}"></div>
+                    <div class="col-md-4" th:insert="~{fragments/form :: password('confirmPassword', 'Confirm password', null)}"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mb-3">
+            <div class="card-header">Company details</div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6" th:insert="~{fragments/form :: input('name', 'Company name', true, null, null)}"></div>
+                    <div class="col-md-6" th:insert="~{fragments/form :: input('sector', 'Sector', false, 'e.g. IT Services', null)}"></div>
+                </div>
+                <div class="row">
+                    <div class="col-md-6" th:insert="~{fragments/form :: input('contactEmail', 'Contact email', false, null, null)}"></div>
+                    <div class="col-md-6" th:insert="~{fragments/form :: input('contactPhone', 'Contact phone', false, null, null)}"></div>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create account</button>
+        <a th:href="@{/}" class="btn btn-link">Cancel</a>
+    </form>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

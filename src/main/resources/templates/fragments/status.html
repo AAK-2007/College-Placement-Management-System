@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<!-- Coloured badge for an ApplicationStatus or InterviewResult value. -->
+<span th:fragment="badge(value)" class="badge"
+      th:with="v=${value.name()}"
+      th:classappend="${v == 'SELECTED' or v == 'PASS'} ? 'text-bg-success'
+                     : (${v == 'REJECTED' or v == 'FAIL'} ? 'text-bg-danger'
+                     : (${v == 'INTERVIEW_SCHEDULED'} ? 'text-bg-warning'
+                     : (${v == 'SHORTLISTED'} ? 'text-bg-info' : 'text-bg-secondary')))"
+      th:text="${#strings.replace(v, '_', ' ')}">STATUS</span>
+</body>
+</html>

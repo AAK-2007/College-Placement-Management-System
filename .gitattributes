@@ -1,0 +1,15 @@
+# Keep line endings correct for everyone who clones the project.
+* text=auto
+
+# Unix shell script (Maven Wrapper for Linux/macOS) must use LF.
+mvnw text eol=lf
+
+# Windows scripts use CRLF.
+*.cmd text eol=crlf
+*.bat text eol=crlf
+*.ps1 text eol=crlf
+
+# Binary files
+*.png binary
+*.jpg binary
+*.jar binary

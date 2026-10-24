@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+<!-- Tab bar shared by the eligibility pages. active: 'job', 'student' or 'explain'. -->
+<div th:fragment="tabs(active)">
+    <h1 class="h3 mb-3" sec:authorize="hasRole('OFFICER')">Eligibility analysis</h1>
+    <h1 class="h3 mb-3" sec:authorize="hasRole('STUDENT')">My eligibility</h1>
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item" sec:authorize="hasRole('OFFICER')">
+            <a class="nav-link" th:classappend="${active == 'job'} ? 'active'" th:href="@{/eligibility/job}">Students for a job</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${active == 'student'} ? 'active'" th:href="@{/eligibility/student}">
+                <span sec:authorize="hasRole('OFFICER')">Jobs for a student</span>
+                <span sec:authorize="hasRole('STUDENT')">Jobs I am eligible for</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" th:classappend="${active == 'explain'} ? 'active'" th:href="@{/eligibility/explain}">
+                <span sec:authorize="hasRole('OFFICER')">Explain (student vs job)</span>
+                <span sec:authorize="hasRole('STUDENT')">Check a job</span>
+            </a>
+        </li>
+    </ul>
+</div>
+</body>
+</html>

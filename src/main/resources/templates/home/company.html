@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Company dashboard')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: navbar}"></header>
+<main class="container">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <h1 class="h3 mb-1" th:text="${company.name}">Company</h1>
+    <p class="section-note mb-4">
+        <span th:text="${#strings.isEmpty(company.sector)} ? 'Recruiter' : ${company.sector}">Sector</span>
+        <th:block th:unless="${#strings.isEmpty(company.contactEmail)}">&middot; <span th:text="${company.contactEmail}">email</span></th:block>
+        <th:block th:unless="${#strings.isEmpty(company.contactPhone)}">&middot; <span th:text="${company.contactPhone}">phone</span></th:block>
+    </p>
+
+    <!-- Application figures -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="card stat-card h-100"><div class="card-body">
+                <div class="section-note small">Job openings</div>
+                <div class="display-6" th:text="${#lists.size(jobs)}">0</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card stat-card h-100"><div class="card-body">
+                <div class="section-note small">New applications</div>
+                <div class="display-6" th:text="${byStatus['APPLIED']}">0</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card stat-card h-100"><div class="card-body">
+                <div class="section-note small">In interviews</div>
+                <div class="display-6"
+                     th:text="${byStatus['SHORTLISTED'] + byStatus['INTERVIEW_SCHEDULED']}">0</div>
+            </div></div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="card stat-card h-100"><div class="card-body">
+                <div class="section-note small">Selected</div>
+                <div class="display-6" th:text="${byStatus['SELECTED']}">0</div>
+            </div></div>
+        </div>
+    </div>
+
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a th:href="@{/jobs/add}" class="btn btn-primary">Post a job</a>
+        <a th:href="@{/applications}" class="btn btn-outline-primary">Review applications</a>
+        <a th:href="@{/interviews}" class="btn btn-outline-primary">Interviews</a>
+    </div>
+
+    <h2 class="h5 mb-2">Our job openings</h2>
+    <div th:if="${#lists.isEmpty(jobs)}" class="section-note mb-3">
+        You have not posted any jobs yet. <a th:href="@{/jobs/add}">Post your first job</a>.
+    </div>
+    <div class="table-responsive" th:unless="${#lists.isEmpty(jobs)}">
+        <table class="table align-middle">
+            <thead>
+            <tr><th>Role</th><th class="text-end">Min CGPA</th><th>Departments</th><th class="text-end">Max backlogs</th>
+                <th>Required skills</th><th class="text-end">Package (LPA)</th><th></th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="j : ${jobs}">
+                <td th:text="${j.role}">Role</td>
+                <td class="text-end" th:text="${#numbers.formatDecimal(j.minCgpa, 1, 2)}">7.00</td>
+                <td th:text="${j.eligibleDepartments}">ALL</td>
+                <td class="text-end" th:text="${j.maxBacklogs}">0</td>
+                <td th:text="${#strings.isEmpty(j.requiredSkills)} ? '(none)' : ${j.requiredSkills}">Java</td>
+                <td class="text-end" th:text="${#numbers.formatDecimal(j.packageLpa, 1, 2)}">6.00</td>
+                <td class="text-end"><a th:href="@{/applications(jobId=${j.jobId})}" class="btn btn-sm btn-outline-secondary">Applicants</a></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

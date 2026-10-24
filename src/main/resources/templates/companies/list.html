@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Companies')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0" sec:authorize="hasRole('OFFICER')">Companies</h1>
+        <h1 class="h3 mb-0" sec:authorize="!hasRole('OFFICER')">Recruiting companies</h1>
+        <a th:href="@{/companies/add}" class="btn btn-primary" sec:authorize="hasRole('OFFICER')">Add company</a>
+    </div>
+
+    <div th:if="${#lists.isEmpty(companies)}" class="alert alert-info">No companies yet. Add the first one.</div>
+
+    <div class="table-responsive" th:unless="${#lists.isEmpty(companies)}">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Sector</th>
+                <th>Contact email</th>
+                <th>Contact phone</th>
+                <th class="text-end">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${companies}">
+                <td th:text="${c.companyId}">1</td>
+                <td th:text="${c.name}">Name</td>
+                <td th:text="${c.sector}"></td>
+                <td th:text="${c.contactEmail}"></td>
+                <td th:text="${c.contactPhone}"></td>
+                <td class="text-end text-nowrap">
+                    <a th:href="@{/jobs(companyId=${c.companyId})}" class="btn btn-sm btn-outline-secondary">Jobs</a>
+                    <th:block sec:authorize="hasRole('OFFICER')">
+                        <a th:href="@{/jobs/add(companyId=${c.companyId})}" class="btn btn-sm btn-outline-primary">Add job</a>
+                        <a th:href="@{/companies/{id}/delete(id=${c.companyId})}" class="btn btn-sm btn-outline-danger">Delete</a>
+                    </th:block>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

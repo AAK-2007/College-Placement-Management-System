@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Delete student')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <h1 class="h3 mb-3">Delete student?</h1>
+
+    <div class="card border-danger">
+        <div class="card-body">
+            <p class="mb-2">
+                You are about to delete <strong th:text="${student.name}">Name</strong>
+                (register number <span th:text="${student.registerNumber}">REG</span>,
+                <span th:text="${student.department}">CSE</span>).
+            </p>
+            <p class="mb-3">
+                This also deletes <strong th:text="${applicationCount}">0</strong> application(s) and
+                <strong th:text="${interviewCount}">0</strong> interview round(s) of this student.
+                This cannot be undone.
+            </p>
+            <form th:action="@{/students/{id}/delete(id=${student.studentId})}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-danger">Yes, delete</button>
+            </form>
+            <a th:href="@{/students}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </div>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Explain eligibility')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <div th:replace="~{eligibility/tabs :: tabs('explain')}"></div>
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <form th:action="@{/eligibility/explain}" method="get" class="row g-2 align-items-end mb-4">
+        <div class="col-md-5" sec:authorize="hasRole('OFFICER')">
+            <label for="studentId" class="form-label">Student</label>
+            <select id="studentId" name="studentId" class="form-select" required>
+                <option value="">Choose a student</option>
+                <option th:each="s : ${students}" th:value="${s.studentId}"
+                        th:text="${s.name + ' (' + s.registerNumber + ', ' + s.department + ')'}"
+                        th:selected="${s.studentId == selectedStudentId}">Student</option>
+            </select>
+        </div>
+        <div class="col-md-5">
+            <label for="jobId" class="form-label">Job</label>
+            <select id="jobId" name="jobId" class="form-select" required>
+                <option value="">Choose a job</option>
+                <option th:each="j : ${jobs}" th:value="${j.jobId}"
+                        th:text="${'#' + j.jobId + '  ' + companyNames[j.companyId] + ' - ' + j.role}"
+                        th:selected="${j.jobId == selectedJobId}">Job</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Explain</button>
+        </div>
+    </form>
+
+    <th:block th:if="${report != null}">
+        <h2 class="h5 mb-3">
+            <span th:text="${report.student.name}">Student</span> vs
+            <span th:text="${companyNames[report.job.companyId] + ' - ' + report.job.role}">Company - Role</span>
+        </h2>
+
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>Criterion</th>
+                    <th>Student</th>
+                    <th>Required</th>
+                    <th>Result</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="c : ${report.checks}">
+                    <td class="fw-semibold" th:text="${c.criterion}">CGPA</td>
+                    <td th:text="${c.studentValue}">8.00</td>
+                    <td>
+                        <span th:text="${c.requirement}">&gt;= 7.00</span>
+                        <div class="small text-muted" th:if="${c.detail != null}" th:text="${c.detail}">1 of 2 matched</div>
+                    </td>
+                    <td>
+                        <span th:if="${c.passed}" class="badge text-bg-success">PASS</span>
+                        <span th:unless="${c.passed}" class="badge text-bg-danger">FAIL</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:if="${report.eligible}" class="alert alert-success d-flex justify-content-between align-items-center gap-2">
+            <span><strong>Overall: ELIGIBLE.</strong> This student can apply for this job.</span>
+            <a th:href="@{/applications/apply(jobId=${report.job.jobId})}" class="btn btn-sm btn-primary"
+               sec:authorize="hasRole('STUDENT')">Apply now</a>
+        </div>
+        <div th:unless="${report.eligible}" class="alert alert-danger">
+            <strong>Overall: NOT ELIGIBLE.</strong> Every criterion must pass.
+        </div>
+    </th:block>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

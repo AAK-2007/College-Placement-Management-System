@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Interviews')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <h1 class="h3 mb-1">Interviews &amp; selection</h1>
+    <p class="text-muted">Open an application to schedule rounds, record results and finalize the selection.</p>
+
+    <!-- Rows for both tables -->
+    <th:block th:each="section : ${ {'In the interview stage', 'All other applications'} }"
+              th:with="rows=${section == 'In the interview stage'} ? ${active} : ${others}">
+        <h2 class="h5 mt-4" th:text="${section}">Section</h2>
+        <div th:if="${#lists.isEmpty(rows)}" class="text-muted mb-3">None.</div>
+        <div class="table-responsive" th:unless="${#lists.isEmpty(rows)}">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Student</th>
+                    <th>Company</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th class="text-end"></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="a : ${rows}">
+                    <td th:text="${a.applicationId}">1</td>
+                    <td th:text="${a.studentName + ' (' + a.registerNumber + ')'}">Name</td>
+                    <td th:text="${a.companyName}">Company</td>
+                    <td th:text="${a.role}">Role</td>
+                    <td><span th:replace="~{fragments/status :: badge(${a.status})}"></span></td>
+                    <td class="text-end">
+                        <a th:href="@{/interviews/application/{id}(id=${a.applicationId})}"
+                           class="btn btn-sm btn-outline-primary">Open</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </th:block>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

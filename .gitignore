@@ -1,4 +1,38 @@
-out/
+# ---- Build output ----
+target/
+*.class
+
+# ---- Secrets: never commit these ----
+# Environment files with DB_USER / DB_PASSWORD / OFFICER_PASSWORD_HASH
+.env
+.env.*
+*.env
+# Local Spring overrides that may contain real passwords
+application-local.properties
+application-*.local.properties
+# MySQL option files (can hold a password)
+*.cnf
+my.ini
+# Keys and certificates
+*.pem
+*.key
+*.p12
+*.jks
+
+# ---- Logs ----
+*.log
+logs/
+
+# ---- IDEs and tools ----
 .idea/
 *.iml
-placement.jar
+.vscode/
+.claude/
+.settings/
+.project
+.classpath
+
+# ---- Operating system files ----
+Thumbs.db
+desktop.ini
+.DS_Store

@@ -1,223 +1,333 @@
-# College Placement Management & Eligibility Analysis System
+# College Placement System — Web Version
 
-A Java + MySQL (JDBC) console application that manages the full campus
-placement lifecycle: student records, company/job postings, automated
-eligibility analysis, applications, interviews, final selection, and
-placement reports/statistics.
+A localhost web version of the **College Placement Management and Eligibility Analysis System**.
+It uses the same business rules as the console project in `..\OOPS` (which is unchanged), with
+Spring Boot, Thymeleaf pages styled with Bootstrap, a login for the placement officer, and a
+pooled MySQL connection.
 
-This implements the project described in the abstract: Java performs all
-processing and decision-making; MySQL is used purely for persistent
-storage and retrieval.
+- Runs at **http://localhost:8080** (only reachable from this computer).
+- Three kinds of users, each seeing only their own part of the site ([details](#who-can-do-what)):
+  the **placement officer**, **students** and **companies**. Students and companies sign up
+  themselves from the home page.
+- Default officer login: **`officer` / `Placement@2026`** — change it before real use ([how](#change-the-officer-login)).
 
-## Architecture
+---
 
-The code is layered by responsibility so each part can be understood,
-tested, and changed independently:
+## Quick start (Windows)
 
-```
-src/
-├── Main.java              Console UI / menu — no business logic, only I/O
-├── model/                 Plain data classes (POJOs)
-│   ├── Student.java
-│   ├── Company.java
-│   ├── Job.java
-│   ├── Application.java
-│   ├── Interview.java
-│   ├── ApplicationStatus.java   (enum)
-│   └── InterviewResult.java     (enum)
-├── dao/                   Data Access Objects — the ONLY classes that write SQL
-│   ├── StudentDAO.java
-│   ├── CompanyDAO.java
-│   ├── JobDAO.java
-│   ├── ApplicationDAO.java
-│   └── InterviewDAO.java
-├── service/                Business logic, built only on models + DAOs
-│   ├── EligibilityService.java   Core eligibility rule engine
-│   ├── PlacementService.java     Apply / interview / selection workflow
-│   └── ReportService.java        Statistics and summary reports
-├── db/
-│   └── DBConnection.java   Singleton JDBC connection manager
-└── util/
-    └── InputValidator.java  Re-prompting console input helper
-schema.sql                 MySQL DDL — run once to create the database
+You need **JDK 17 or newer** and **MySQL Server 8** (running). Maven is **not** needed: the
+project includes the Maven Wrapper (`mvnw.cmd`), which downloads Maven by itself on first run.
+The first run also downloads the libraries, so it needs internet and takes a few minutes.
+
+Open **PowerShell** in the `placement-web` folder, then:
+
+```powershell
+.\setup-database.ps1
 ```
 
-### Why this design
+It asks (in hidden prompts) for your **MySQL root password** and a **new password for the app's
+MySQL user** `OOPS_User`. It creates or resets that user, gives it access to `placement_system`,
+and creates the tables from `sql\schema.sql` if the database is empty. Existing data is never touched.
 
-- **Separation of concerns (layered architecture):** UI (`Main`) → business
-  rules (`service`) → persistence (`dao`) → database. Each layer only talks
-  to the one below it, so, for example, the eligibility rules can be
-  changed without touching any SQL, and the storage engine could be
-  swapped without touching business logic.
-- **Encapsulation:** every model class keeps its fields private and
-  exposes them only through getters/setters, so validation and formatting
-  logic has one place to live.
-- **Single Responsibility:** each DAO handles exactly one table; each
-  service handles exactly one concern (eligibility, workflow, or
-  reporting).
-- **PreparedStatement everywhere:** all SQL is parameterized, which
-  prevents SQL injection and lets the JDBC driver cache query plans.
-- **Fail-fast startup:** `Main` opens the DB connection immediately on
-  launch so configuration problems surface before any menu is shown.
-
-## Core feature: eligibility analysis
-
-`EligibilityService.isEligible(Student, Job)` checks four independent
-criteria — CGPA, backlog count, department, and required skills — and
-combines them with logical AND. Because each rule is a private method,
-you can add a new criterion (e.g. a minimum semester, or a "no active
-offer" rule) by adding one more private check and one more term in
-`isEligible`, without touching anything else.
-
-`explainEligibility` reuses the same private checks to produce a
-line-by-line PASS/FAIL breakdown, so a student can see exactly which
-condition is blocking them from a role.
-
-## Selection workflow
-
-1. A student applies (`PlacementService.apply`) — this re-validates
-   eligibility and rejects duplicate applications before touching the DB.
-2. A placement officer can shortlist an application, schedule one or more
-   interview rounds, and record PASS/FAIL/PENDING for each round.
-3. `finalizeSelection` looks at every recorded round for an application:
-   any FAIL → REJECTED; all PASS → SELECTED; anything still PENDING →
-   status is left unchanged until every round is resolved.
-
-## Reports
-
-`ReportDAO` computes every statistic with SQL directly — `COUNT`, `MAX`,
-and `GROUP BY` — rather than fetching entire tables into Java and
-summing them in loops. `ReportService` just calls it and formats the
-results. This keeps report generation fast and constant-memory
-regardless of how many placement records accumulate.
-
-## Performance notes
-
-Two query paths are deliberately split between what SQL does well and
-what only Java can do cleanly here:
-
-- **Eligibility candidate search** (`StudentDAO.findCandidatesByCriteria`,
-  `JobDAO.findJobsMatchingStudent`): CGPA, backlog, and department checks
-  are pushed into the `WHERE` clause, so the database — not a Java loop —
-  eliminates the vast majority of non-matching rows before anything
-  crosses the JDBC boundary. Only the skill check, which can't be
-  expressed as a safe SQL predicate over a free-text comma-separated
-  column without normalizing the schema, still runs in Java — but only
-  against the small set of rows that already passed everything else.
-- **Reporting** (`ReportDAO`): totals, highest package, and department-/
-  company-wise selection counts are all single aggregate SQL queries
-  instead of full-table scans in application code.
-
-If the `skills` column becomes a bottleneck at larger scale, the natural
-next step is to normalize it into a `student_skills(student_id, skill)`
-junction table (and similarly for `job_required_skills`), which would let
-skill matching become a SQL join/`HAVING COUNT(...)` as well.
-
-## Setup
-
-### 1. Requirements
-
-- JDK 17 or later (the code uses text blocks and switch expressions). Check with `java -version` and `javac -version`.
-- MySQL Server 8 (running) and the MySQL command-line client or MySQL Workbench.
-- The MySQL Connector/J driver. It is already included in this repository as `lib/mysql-connector-j-26.10.0.jar`.
-
-### 2. Create the database
-
-Open Command Prompt in the project folder (the folder that contains `schema.sql`) and run the script as the MySQL root user:
-
-```cmd
-mysql -u root -p < schema.sql
+```powershell
+.\run.ps1
 ```
 
-This creates the `placement_system` database with its five tables (students, companies, jobs, applications, interviews) and indexes. If `mysql` is not recognised, add the MySQL `bin` folder to your PATH, or open `schema.sql` in MySQL Workbench and run it there.
+It asks for the MySQL user (press Enter for `OOPS_User`) and its password, then starts the app.
+Open http://localhost:8080 when you see `Started PlacementWebApplication`. Stop it with **Ctrl+C**.
 
-### 3. Create a MySQL user for the application (recommended)
+The steps below do the same thing by hand.
 
-Log in to MySQL as root (`mysql -u root -p`) and run:
+---
+
+## Setup step by step
+
+### 1. Check Java and MySQL
+
+```powershell
+java -version
+```
+```powershell
+Get-Service MySQL80
+```
+
+Java must be 17 or newer. The MySQL service should be `Running` (start it with
+`Start-Service MySQL80` from an Administrator PowerShell, or from the Services app).
+
+The MySQL command-line client is at
+`C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe`. If `mysql` is not recognised, use that
+full path, as below, or add the `bin` folder to PATH.
+
+### 2. Create the MySQL user
+
+Log in as root:
+
+```powershell
+& "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysql.exe" -u root -p
+```
+
+At the `mysql>` prompt (choose your own password):
 
 ```sql
-CREATE USER 'OOPS_User'@'localhost' IDENTIFIED BY 'choose_a_password';
+CREATE USER IF NOT EXISTS 'OOPS_User'@'localhost' IDENTIFIED BY 'choose_a_password';
+ALTER USER 'OOPS_User'@'localhost' IDENTIFIED BY 'choose_a_password';
 GRANT ALL PRIVILEGES ON placement_system.* TO 'OOPS_User'@'localhost';
 FLUSH PRIVILEGES;
 ```
 
-You can use any user name and password. You can also use `root` directly.
+### 3. Create the tables (and optional sample data)
 
-### 4. Set the connection details
+Still at the `mysql>` prompt, using the full path to your `placement-web` folder (with forward slashes):
 
-Open `src/db/DBConnection.java` and replace the placeholders with your own values:
-
-```java
-private static final String DB_USER = "OOPS_User";          // your MySQL user
-private static final String DB_PASSWORD = "choose_a_password"; // your MySQL password
+```sql
+SOURCE C:/path/to/placement-web/sql/schema.sql;
 ```
 
-The URL is `jdbc:mysql://localhost:3306/placement_system?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC`. Change `localhost` or `3306` only if your MySQL server runs somewhere else. Do not commit your real password to GitHub.
+Skip `schema.sql` if `placement_system` already has its tables (for example, from the console
+version) — it would stop at "Duplicate key name" because the indexes already exist.
 
-### 5. Compile and run (Windows Command Prompt)
+The web version adds a sixth table, `users` (login accounts for students and companies). You do
+not need to create it: the app creates it at startup if it is missing
+(`src/main/resources/db/users-table.sql`). It is also in `sql/schema.sql` for new databases.
 
-```cmd
-dir /s /b src\*.java > sources.txt
-javac -cp "lib\*" -d out @sources.txt
-java -cp "out;lib\*" Main
+To load made-up students, companies and jobs into an **empty** database:
+
+```sql
+SOURCE C:/path/to/placement-web/sql/sample-data.sql;
 ```
 
-On Linux or macOS use `:` instead of `;`, and `find src -name "*.java" > sources.txt`:
+Type `exit` to leave MySQL.
 
-```bash
-find src -name "*.java" > sources.txt
-javac -cp "lib/*" -d out @sources.txt
-java -cp "out:lib/*" Main
+### 4. Set the database environment variables
+
+The app reads the database settings from environment variables; no password is stored in the project.
+
+| Variable | Meaning | Default |
+|---|---|---|
+| `DB_USER` | MySQL user | *(none — required)* |
+| `DB_PASSWORD` | MySQL password | *(none — required)* |
+| `DB_URL` | JDBC URL | `jdbc:mysql://localhost:3306/placement_system?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC` |
+| `OFFICER_USERNAME` | Web login user name | `officer` |
+| `OFFICER_PASSWORD_HASH` | BCrypt hash of the web login password | hash of `Placement@2026` |
+
+**For the current PowerShell window only** (recommended; `run.ps1` does this for you):
+
+```powershell
+$env:DB_USER = "OOPS_User"
+```
+```powershell
+$env:DB_PASSWORD = "your_password"
 ```
 
-### 6. Run from VS Code or IntelliJ (optional)
+**Permanently for your Windows account** (then open a new terminal). Note that this stores the
+password in plain text in your user environment:
 
-Open the project folder, make sure `lib/mysql-connector-j-26.10.0.jar` is on the project's classpath (VS Code: Java Projects, Referenced Libraries, add the jar; IntelliJ: Project Structure, Libraries, add the jar), then run `Main.java`.
-
-### 7. Build a runnable JAR (optional)
-
-This needs the JDK's `bin` folder on your PATH (so that `jar` is recognised). After step 5:
-
-```cmd
-cd out
-jar xf ..\lib\mysql-connector-j-26.10.0.jar
-cd ..
-jar cfe placement.jar Main -C out .
-java -jar placement.jar
+```powershell
+setx DB_USER "OOPS_User"
+```
+```powershell
+setx DB_PASSWORD "your_password"
 ```
 
-The MySQL server must be running whenever you start the program. Run `java -jar placement.jar` from the project folder.
+In **Command Prompt** (cmd) the per-window form is `set DB_USER=OOPS_User`. In PowerShell,
+`set` does **not** set environment variables — use `$env:` as above.
 
-### Common errors
+### 5. Run the app
 
-| Error | Cause and fix |
-| --- | --- |
-| `ClassNotFoundException: com.mysql.cj.jdbc.Driver` | The Connector/J jar is not on the classpath. Add `lib\*` to `-cp`. |
-| `Public Key Retrieval is not allowed` | Keep `allowPublicKeyRetrieval=true` in the URL. |
-| `Access denied for user ... (using password: YES)` | `DB_USER` or `DB_PASSWORD` in `DBConnection.java` is wrong. |
-| `Access denied for user ... to database 'placement_system'` | Run the `GRANT` statement in step 3 and make sure `schema.sql` was run. |
-| `'jar' is not recognized` | Add the JDK `bin` folder (not just the JRE or javapath shim) to PATH. |
+```powershell
+.\mvnw.cmd spring-boot:run
+```
 
-## Suggested demo flow
+Open **http://localhost:8080** and log in as `officer` / `Placement@2026`.
+The dashboard shows the placement summary; if the database is not reachable it says why
+(wrong password, missing database, MySQL not running).
 
-1. Add 2–3 companies, then a job under each with different CGPA/backlog/
-   department/skill requirements (Job Management).
-2. Add several students with varying CGPA, backlogs, and skills (Student
-   Management).
-3. Run Eligibility Analysis → "Find eligible students for a job" to see
-   the rule engine at work, and "Explain eligibility" for a rejected
-   student to see exactly why.
-4. Apply on behalf of an eligible student, shortlist, schedule an
-   interview, record a PASS result, then finalize selection.
-5. Open Placement Reports to see the aggregated summary update.
+`mvn spring-boot:run` also works if you install Maven yourself.
 
-## Possible extensions
+### Change the officer login
 
-- Add authentication so students and placement officers see different
-  menus (role-based access).
-- Add a package/CTC-based ranking so a student is shown their
-  highest-paying eligible offer first.
-- Export the summary report to CSV/PDF.
-- Replace the console UI with a JavaFX or Spring Boot web front-end —
-  because business logic lives entirely in `service/`, this only means
-  writing a new UI layer, not rewriting the rules.
+The password is only ever stored as a BCrypt hash. To make a hash for a new password:
+
+```powershell
+.\mvnw.cmd -q spring-boot:run "-Dspring-boot.run.arguments=--hash-password=MyNewPassword"
+```
+
+It prints `OFFICER_PASSWORD_HASH=$2a$10$...` and exits. Set that value (single quotes, because
+the hash contains `$`) before starting the app:
+
+```powershell
+$env:OFFICER_PASSWORD_HASH = '$2a$10$...paste the hash here...'
+```
+
+`OFFICER_USERNAME` changes the user name the same way.
+
+---
+
+## Running the tests
+
+```powershell
+.\mvnw.cmd test
+```
+
+77 JUnit 5 tests cover the service rules and who can open what. They use Mockito in place of the
+database, so MySQL does not need to be running:
+
+| Test class | What it checks |
+|---|---|
+| `service.EligibilityServiceTest` | CGPA / backlog boundaries, department list and ALL, partial skill match (at least one), no skills required, case and spaces ignored, SQL pushdown arguments, ranking by matched skills, PASS/FAIL explanation |
+| `service.PlacementServiceTest` | Apply (all five outcomes, duplicate caught by the unique key); shortlist only from APPLIED; interviews only for SHORTLISTED / INTERVIEW_SCHEDULED; results frozen once decided; finalize (any FAIL → REJECTED, PENDING or no rounds → unchanged, all PASS → SELECTED, decided never moves backwards) |
+| `util.FormValidatorTest` | CGPA 0–10, backlogs ≥ 0, package 0–1000, required/optional text, "empty keeps current value", both date formats, impossible dates |
+| `web.controller.JobControllerTest` | How eligible departments are stored (upper case, ALL) |
+| `web.AccessControlTest` | Logs in as a visitor, student, company and officer: blocked pages return "forbidden", and a student or company cannot reach another student's or company's records even by changing ids in the address or form |
+
+---
+
+## Who can do what
+
+The home page (`/`) is public: it explains the system and links to log in and to the two sign-up
+pages. After logging in, each user gets their own dashboard and menu.
+
+| Section | Placement officer | Student | Company |
+|---|---|---|---|
+| **Dashboard** | Placement summary report | Own profile, jobs they are eligible for, own applications | Own company, jobs and application figures |
+| **Students** | List, add, edit, delete | Only **My profile** (view and edit; register number fixed) | — |
+| **Companies** | List, add, delete | View the list (read only) | — (own details on the dashboard) |
+| **Jobs** | All jobs, add for any company | View all openings (read only), with Check eligibility and Apply | Only **own** jobs; post new jobs for itself |
+| **Eligibility** | All three views for any student or job | Only their **own**: eligible jobs and PASS/FAIL per job | — |
+| **Applications** | All; apply for any student; shortlist | Apply for themselves; see **own** applications and status | Only applications to **own** jobs; shortlist |
+| **Interviews** | All applications | — | Only applications to **own** jobs: schedule rounds, record PASS/FAIL, finalize |
+
+How it is enforced:
+
+- **Page rules** in `web/config/SecurityConfig.java` decide which roles may open which addresses.
+  Opening anything else shows "You do not have access to that page" (HTTP 403).
+- **Ownership checks** in the controllers: a student's id and a company's id come from their login,
+  never from the form or address. A student who sends someone else's id still only applies for or
+  sees themselves; a company that opens another company's application gets the 403 page.
+- The menu only shows the sections the role can use.
+
+### Accounts
+
+- **Students** sign up at *Register as a student* with a user name, password and their academic
+  profile (same rules as the officer's Add student form). **Companies** sign up at *Register a
+  company* with a user name, password and company details. Each sign-up creates the record and a
+  login linked to it.
+- User names are unique (the officer's user name is reserved); passwords need at least 8
+  characters and are stored only as BCrypt hashes in the `users` table.
+- Students and companies added by the officer, or from the console version, have **no login**;
+  they remain managed by the officer.
+- Deleting a student or company (officer only) also deletes its login.
+
+Errors never show a stack trace: database problems show a plain message, and form mistakes are
+highlighted on the form with the same messages as the console version.
+
+---
+
+## Business rules (same as the console version)
+
+- **Eligibility:** CGPA ≥ job minimum, backlogs ≤ job maximum, department in the job's list (or ALL),
+  and at least **one** required skill (no skills required = pass). Results are sorted by number of
+  matching skills, best first. CGPA, backlogs and department are filtered in SQL; only the skill
+  check runs in Java.
+- **Apply:** the student and job must exist, the student must not have applied already, and must be eligible.
+- **Status flow:** APPLIED → SHORTLISTED (only from APPLIED) → INTERVIEW_SCHEDULED (rounds can be added only
+  to SHORTLISTED or INTERVIEW_SCHEDULED applications) → SELECTED or REJECTED.
+- **Finalize:** any FAIL → REJECTED; any PENDING or no rounds → unchanged; all PASS → SELECTED.
+  Decided applications never move backwards.
+- **Validation:** CGPA 0–10, backlogs ≥ 0, package 0–1000, unique register number, valid interview
+  date (empty = today); email, phone, sector and skills are optional.
+- **Delete:** deleting a student or company also deletes their applications and interviews
+  (`ON DELETE CASCADE` in `schema.sql`), after a confirmation page.
+
+### Differences from the console version
+
+- **Three roles with their own logins** (officer, student, company) and a new `users` table, as
+  described in [Who can do what](#who-can-do-what).
+- **Connection pool.** `DBConnection` hands out connections from a HikariCP pool (max 10). Every DAO
+  method borrows one and closes it, which returns it to the pool. The SQL itself is unchanged.
+- **Decided applications are fully frozen.** The console allowed changing a round's result after the
+  decision and finalizing again, which could turn REJECTED into SELECTED. Now recording a result
+  needs an INTERVIEW_SCHEDULED application, only PASS or FAIL can be recorded, and finalize never
+  changes a SELECTED/REJECTED application.
+- **Services return data.** `EligibilityService.explainEligibility` returns a PASS/FAIL report and the
+  eligible lists include the matched-skill count; `ReportService.printSummary` became `getSummary()`.
+- **Stored text is tidied.** Departments are saved in upper case. A job's departments are saved as
+  e.g. `CSE,IT`, and any list containing ALL is saved as just `ALL` (the SQL filter only recognises
+  ALL as the whole value). Blank optional fields are saved as empty (NULL).
+- **Extra read-only queries** for display: application lists with names, counts for the delete
+  confirmation pages, and total students / companies / jobs as `COUNT(*)`.
+
+---
+
+## Project layout
+
+```
+placement-web/
+├── pom.xml                      Spring Boot 3.5 (web, thymeleaf, security, jdbc), MySQL driver, tests
+├── mvnw, mvnw.cmd, .mvn/        Maven Wrapper
+├── setup-database.ps1           Creates/resets the MySQL user and creates the tables
+├── run.ps1                      Asks for the DB login and starts the app
+├── sql/
+│   ├── schema.sql               The console version's schema.sql plus the users table
+│   └── sample-data.sql          Made-up students, companies and jobs
+└── src/
+    ├── main/java/
+    │   ├── model/               Copied unchanged from the console version
+    │   ├── dao/                 Console DAOs using pooled connections (+ display queries), UserDAO
+    │   ├── service/             Eligibility / Placement / Report services
+    │   ├── db/DBConnection      Wraps the HikariCP pool
+    │   ├── util/FormValidator   Web replacement for the console InputValidator
+    │   └── web/                 Spring Boot app, config (beans, page rules), controllers, forms,
+    │       │                    friendly error handling
+    │       └── security/        Logged-in user (AppUser), roles, account lookup, ownership checks
+    ├── main/resources/
+    │   ├── application.properties   Settings; database values come from environment variables
+    │   ├── db/users-table.sql       Creates the users table at startup if missing
+    │   ├── templates/               Thymeleaf pages (home/ = welcome and dashboards, register/ = sign-up)
+    │   └── static/css/app.css       Site theme
+    └── test/java/               JUnit tests
+```
+
+Bootstrap is loaded from the jsDelivr CDN, so pages need internet to look styled; they still work
+without it.
+
+---
+
+## Troubleshooting
+
+| Message | Cause and fix |
+|---|---|
+| Browser: "localhost refused to connect" | The app is not running. Start it (`.\run.ps1`) and wait for `Started PlacementWebApplication`. |
+| "You do not have access to that page" | That page is not part of your role (see [Who can do what](#who-can-do-what)), or the record belongs to another student or company. |
+| Login: "the database cannot be reached" | MySQL is down or `DB_USER` / `DB_PASSWORD` are wrong; student and company logins need the database. |
+| "MySQL rejected the user name or password" | `DB_USER` / `DB_PASSWORD` are wrong. Run `.\setup-database.ps1` to reset the `OOPS_User` password, then `.\run.ps1`. |
+| "The placement_system database does not exist yet" | Run `schema.sql` (step 3) or `.\setup-database.ps1`. |
+| "Could not connect to the database" | MySQL is not running: `Start-Service MySQL80` (as Administrator). |
+| `setup-database.ps1`: "MySQL did not accept the root password" | The root password is wrong. If it is lost, see [Reset the MySQL root password](#reset-the-mysql-root-password). |
+| `mvnw : The term 'mvnw' is not recognized` | In PowerShell, run it as `.\mvnw.cmd` from inside the `placement-web` folder. |
+| "running scripts is disabled on this system" | Run `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` once, or start the script with `powershell -ExecutionPolicy Bypass -File .\run.ps1`. |
+| "Port 8080 was already in use" | The app (or another program) is already running. Stop it with Ctrl+C in its window, or close that program. |
+| `schema.sql`: "Duplicate key name" | The tables already exist; you do not need to run `schema.sql` again. |
+
+### Reset the MySQL root password
+
+In an **Administrator** PowerShell (replace `NewRootPass1`):
+
+```powershell
+Stop-Service MySQL80
+```
+```powershell
+Set-Content C:\mysql-init.txt "ALTER USER 'root'@'localhost' IDENTIFIED BY 'NewRootPass1';"
+```
+```powershell
+& "C:\Program Files\MySQL\MySQL Server 8.0\bin\mysqld.exe" --defaults-file="C:\ProgramData\MySQL\MySQL Server 8.0\my.ini" --init-file=C:\mysql-init.txt --console
+```
+
+When it prints "ready for connections", press Ctrl+C and wait for it to stop. Then:
+
+```powershell
+Remove-Item C:\mysql-init.txt
+```
+```powershell
+Start-Service MySQL80
+```

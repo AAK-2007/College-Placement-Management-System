@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Dashboard')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <h1 class="h3 mb-3">Placement summary</h1>
+
+    <div th:if="${summary == null}" class="alert alert-danger"
+         th:text="${dbMessage != null} ? ${dbMessage} : 'The report could not be loaded.'">Database problem.</div>
+
+    <th:block th:if="${summary != null}" th:with="s=${summary}">
+
+        <!-- Headline figures -->
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3">
+                <div class="card stat-card h-100 border-success">
+                    <div class="card-body">
+                        <div class="text-muted small">Students selected</div>
+                        <div class="display-6" th:text="${s.totalSelected}">0</div>
+                        <div class="small text-muted">distinct students with an offer</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="text-muted small">Total offers</div>
+                        <div class="display-6" th:text="${s.totalOffers}">0</div>
+                        <div class="small text-muted">selected applications</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="text-muted small">Total applications</div>
+                        <div class="display-6" th:text="${s.totalApplications}">0</div>
+                        <div class="small text-muted">all statuses</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-lg-3">
+                <div class="card stat-card h-100">
+                    <div class="card-body">
+                        <div class="text-muted small">Highest package</div>
+                        <div class="display-6">
+                            <span th:text="${#numbers.formatDecimal(s.highestPackage, 1, 2)}">0.00</span>
+                            <span class="fs-6 text-muted">LPA</span>
+                        </div>
+                        <div class="small text-muted">among selected offers</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <p class="text-muted">
+            <span th:text="${s.totalStudents}">0</span> students registered ·
+            <span th:text="${s.totalCompanies}">0</span> companies ·
+            <span th:text="${s.totalJobs}">0</span> job openings
+        </p>
+
+        <!-- Breakdowns -->
+        <div class="row g-4">
+            <div class="col-md-6">
+                <h2 class="h5">Selected students by department</h2>
+                <div th:if="${#maps.isEmpty(s.selectedByDepartment)}" class="text-muted">No selections yet.</div>
+                <table class="table table-striped" th:unless="${#maps.isEmpty(s.selectedByDepartment)}">
+                    <thead class="table-light">
+                    <tr><th>Department</th><th class="text-end">Selected students</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="e : ${s.selectedByDepartment}">
+                        <td th:text="${e.key}">CSE</td>
+                        <td class="text-end" th:text="${e.value}">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h2 class="h5">Selected students by company</h2>
+                <div th:if="${#maps.isEmpty(s.selectedByCompany)}" class="text-muted">No selections yet.</div>
+                <table class="table table-striped" th:unless="${#maps.isEmpty(s.selectedByCompany)}">
+                    <thead class="table-light">
+                    <tr><th>Company</th><th class="text-end">Selected students</th></tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="e : ${s.selectedByCompany}">
+                        <td th:text="${e.key}">Company</td>
+                        <td class="text-end" th:text="${e.value}">0</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </th:block>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Interview rounds')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container"
+      th:with="st=${app.status.name()},
+               canSchedule=${st == 'SHORTLISTED' or st == 'INTERVIEW_SCHEDULED'},
+               decided=${st == 'SELECTED' or st == 'REJECTED'}">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <a th:href="@{/interviews}" class="small">&larr; All applications</a>
+    <h1 class="h3 mt-1 mb-1">
+        Application #<span th:text="${app.applicationId}">1</span>
+        <span th:replace="~{fragments/status :: badge(${app.status})}"></span>
+    </h1>
+    <p class="text-muted">
+        <span th:text="${app.studentName + ' (' + app.registerNumber + ')'}">Student</span> ·
+        <span th:text="${app.companyName + ' - ' + app.role}">Company - Role</span> ·
+        applied on <span th:text="${app.applicationDate}">date</span>
+    </p>
+
+    <div th:if="${st == 'APPLIED'}" class="alert alert-warning">
+        This application has not been shortlisted yet. Shortlist it on the
+        <a th:href="@{/applications(studentId=${app.studentId})}">Applications page</a> before scheduling interviews.
+    </div>
+    <div th:if="${decided}" class="alert alert-secondary">
+        This application is decided (<span th:text="${st}">SELECTED</span>). Its rounds can no longer be changed.
+    </div>
+
+    <!-- Rounds -->
+    <h2 class="h5 mt-4">Interview rounds</h2>
+    <div th:if="${#lists.isEmpty(rounds)}" class="text-muted mb-3">No rounds yet.</div>
+    <div class="table-responsive" th:unless="${#lists.isEmpty(rounds)}">
+        <table class="table align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>Round</th>
+                <th>Date</th>
+                <th>Result</th>
+                <th>Remarks</th>
+                <th th:if="${st == 'INTERVIEW_SCHEDULED'}">Record result</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="r : ${rounds}">
+                <td th:text="${r.interviewId}">1</td>
+                <td th:text="${r.round}">Technical</td>
+                <td th:text="${r.interviewDate}">date</td>
+                <td><span th:replace="~{fragments/status :: badge(${r.result})}"></span></td>
+                <td th:text="${r.remarks}"></td>
+                <td th:if="${st == 'INTERVIEW_SCHEDULED'}">
+                    <form th:action="@{/interviews/{iid}/result(iid=${r.interviewId})}" method="post"
+                          class="d-flex gap-2">
+                        <input type="hidden" name="applicationId" th:value="${app.applicationId}">
+                        <select name="result" class="form-select form-select-sm" style="width: auto" required
+                                th:attr="aria-label='Result for round ' + ${r.round}">
+                            <option value="PASS" th:selected="${r.result.name() == 'PASS'}">PASS</option>
+                            <option value="FAIL" th:selected="${r.result.name() == 'FAIL'}">FAIL</option>
+                        </select>
+                        <input type="text" name="remarks" class="form-control form-control-sm" maxlength="255"
+                               placeholder="Remarks (optional)" th:value="${r.remarks}"
+                               th:attr="aria-label='Remarks for round ' + ${r.round}">
+                        <button type="submit" class="btn btn-sm btn-outline-primary">Save</button>
+                    </form>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="row g-4 mt-1">
+        <!-- Schedule a round -->
+        <div class="col-md-7" th:if="${canSchedule}">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="h6">Schedule a round</h2>
+                    <form th:action="@{/interviews/application/{id}/schedule(id=${app.applicationId})}" method="post"
+                          class="row g-2 align-items-end">
+                        <div class="col-sm-6">
+                            <label for="round" class="form-label">Round name<span class="text-danger"> *</span></label>
+                            <input type="text" id="round" name="round" class="form-control" maxlength="50"
+                                   placeholder="e.g. Technical" required>
+                        </div>
+                        <div class="col-sm-4">
+                            <label for="date" class="form-label">Date</label>
+                            <input type="date" id="date" name="date" class="form-control" th:value="${today}">
+                        </div>
+                        <div class="col-sm-2">
+                            <button type="submit" class="btn btn-primary w-100">Add</button>
+                        </div>
+                    </form>
+                    <div class="form-text">Leave the date empty for today.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Finalize -->
+        <div class="col-md-5" th:if="${st == 'INTERVIEW_SCHEDULED'}">
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="h6">Finalize selection</h2>
+                    <p class="small text-muted mb-2">
+                        Any FAIL gives REJECTED. All PASS gives SELECTED. If a round is still PENDING, nothing changes.
+                    </p>
+                    <form th:action="@{/interviews/application/{id}/finalize(id=${app.applicationId})}" method="post">
+                        <button type="submit" class="btn btn-success">Finalize selection</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

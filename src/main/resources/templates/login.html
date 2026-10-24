@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Log in')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: navbar}"></header>
+<main class="container">
+    <div class="auth-card mt-3">
+        <div th:replace="~{fragments/layout :: alerts}"></div>
+
+        <div class="card">
+            <div class="card-body p-4">
+                <h1 class="h3 mb-1">Log in</h1>
+                <p class="section-note mb-4">Students, recruiters and the placement office use the same page.</p>
+
+                <div th:if="${param.error}" class="alert alert-danger">Wrong user name or password.</div>
+                <div th:if="${param.unavailable}" class="alert alert-danger">
+                    Logging in is not possible right now because the database cannot be reached. Please try again later.
+                </div>
+                <div th:if="${param.logout}" class="alert alert-success">You have been logged out.</div>
+
+                <form th:action="@{/login}" method="post">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">User name</label>
+                        <input type="text" id="username" name="username" class="form-control"
+                               autocomplete="username" required autofocus>
+                    </div>
+                    <div class="mb-4">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" id="password" name="password" class="form-control"
+                               autocomplete="current-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Log in</button>
+                </form>
+            </div>
+        </div>
+
+        <p class="text-center mt-3 section-note">
+            New here?
+            <a th:href="@{/register/student}">Register as a student</a> or
+            <a th:href="@{/register/company}">register a company</a>.
+        </p>
+    </div>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

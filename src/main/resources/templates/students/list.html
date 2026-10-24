@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Students')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0">Students</h1>
+        <a th:href="@{/students/add}" class="btn btn-primary">Add student</a>
+    </div>
+
+    <div th:if="${#lists.isEmpty(students)}" class="alert alert-info">No students yet. Add the first one.</div>
+
+    <div class="table-responsive" th:unless="${#lists.isEmpty(students)}">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th>Register No.</th>
+                <th>Name</th>
+                <th>Department</th>
+                <th class="text-end">CGPA</th>
+                <th class="text-end">Backlogs</th>
+                <th>Skills</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th class="text-end">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="s : ${students}">
+                <td th:text="${s.studentId}">1</td>
+                <td th:text="${s.registerNumber}">REG001</td>
+                <td th:text="${s.name}">Name</td>
+                <td th:text="${s.department}">CSE</td>
+                <td class="text-end" th:text="${#numbers.formatDecimal(s.cgpa, 1, 2)}">8.50</td>
+                <td class="text-end" th:text="${s.backlogs}">0</td>
+                <td th:text="${s.skills}">Java</td>
+                <td th:text="${s.email}"></td>
+                <td th:text="${s.phone}"></td>
+                <td class="text-end text-nowrap">
+                    <a th:href="@{/students/{id}/edit(id=${s.studentId})}" class="btn btn-sm btn-outline-primary">Edit</a>
+                    <a th:href="@{/students/{id}/delete(id=${s.studentId})}" class="btn btn-sm btn-outline-danger">Delete</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

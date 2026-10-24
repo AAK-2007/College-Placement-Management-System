@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Add company')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <h1 class="h3 mb-3">Add company</h1>
+
+    <form th:action="@{/companies/add}" th:object="${form}" method="post" class="card card-body" novalidate>
+        <div class="row">
+            <div class="col-md-6" th:insert="~{fragments/form :: input('name', 'Company name', true, null, null)}"></div>
+            <div class="col-md-6" th:insert="~{fragments/form :: input('sector', 'Sector', false, 'e.g. IT Services', 'Optional.')}"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-6" th:insert="~{fragments/form :: input('contactEmail', 'Contact email', false, null, 'Optional.')}"></div>
+            <div class="col-md-6" th:insert="~{fragments/form :: input('contactPhone', 'Contact phone', false, null, 'Optional.')}"></div>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary">Save company</button>
+            <a th:href="@{/companies}" class="btn btn-link">Cancel</a>
+        </div>
+    </form>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

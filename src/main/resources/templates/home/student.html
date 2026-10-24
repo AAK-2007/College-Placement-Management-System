@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Student dashboard')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: navbar}"></header>
+<main class="container">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <h1 class="h3 mb-1">Welcome, <span th:text="${student.name}">Student</span></h1>
+    <p class="section-note mb-4">
+        <span th:text="${student.registerNumber}">REG</span> &middot; <span th:text="${student.department}">CSE</span>
+    </p>
+
+    <div class="row g-4">
+        <!-- Profile summary -->
+        <div class="col-lg-4">
+            <div class="card h-100">
+                <div class="card-header">My profile</div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-5">CGPA</dt>
+                        <dd class="col-7" th:text="${#numbers.formatDecimal(student.cgpa, 1, 2)}">8.00</dd>
+                        <dt class="col-5">Backlogs</dt>
+                        <dd class="col-7" th:text="${student.backlogs}">0</dd>
+                        <dt class="col-5">Skills</dt>
+                        <dd class="col-7" th:text="${#strings.isEmpty(student.skills)} ? '(none)' : ${student.skills}">Java</dd>
+                        <dt class="col-5">Email</dt>
+                        <dd class="col-7" th:text="${#strings.isEmpty(student.email)} ? '-' : ${student.email}">-</dd>
+                        <dt class="col-5">Phone</dt>
+                        <dd class="col-7" th:text="${#strings.isEmpty(student.phone)} ? '-' : ${student.phone}">-</dd>
+                    </dl>
+                    <a th:href="@{/students/me}" class="btn btn-sm btn-outline-primary mt-3">Edit profile</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Jobs I qualify for -->
+        <div class="col-lg-8">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Jobs you are eligible for (<span th:text="${#lists.size(eligibleJobs)}">0</span>)</span>
+                    <a th:href="@{/jobs}" class="small">All job openings</a>
+                </div>
+                <div class="card-body p-0">
+                    <div th:if="${#lists.isEmpty(eligibleJobs)}" class="p-3 section-note">
+                        No openings match your profile right now. Check <a th:href="@{/eligibility/student}">My eligibility</a> to see why.
+                    </div>
+                    <table class="table mb-0 align-middle" th:unless="${#lists.isEmpty(eligibleJobs)}">
+                        <thead>
+                        <tr><th>Company</th><th>Role</th><th class="text-end">Package (LPA)</th><th>Skills</th><th></th></tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="r : ${eligibleJobs}">
+                            <td th:text="${companyNames[r.job.companyId]}">Company</td>
+                            <td th:text="${r.job.role}">Role</td>
+                            <td class="text-end" th:text="${#numbers.formatDecimal(r.job.packageLpa, 1, 2)}">6.00</td>
+                            <td>
+                                <span th:if="${r.requiredSkills == 0}" class="section-note small">none required</span>
+                                <span th:unless="${r.requiredSkills == 0}" class="badge text-bg-success"
+                                      th:text="${r.matchedSkills + ' of ' + r.requiredSkills}">1 of 2</span>
+                            </td>
+                            <td class="text-end">
+                                <span th:if="${appliedJobIds.contains(r.job.jobId)}" class="badge text-bg-light border">Applied</span>
+                                <a th:unless="${appliedJobIds.contains(r.job.jobId)}"
+                                   th:href="@{/applications/apply(jobId=${r.job.jobId})}" class="btn btn-sm btn-primary">Apply</a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My applications -->
+    <h2 class="h5 mt-4 mb-2">My applications</h2>
+    <div th:if="${#lists.isEmpty(applications)}" class="section-note">You have not applied to any job yet.</div>
+    <div class="table-responsive" th:unless="${#lists.isEmpty(applications)}">
+        <table class="table align-middle">
+            <thead>
+            <tr><th>Company</th><th>Role</th><th>Applied on</th><th>Status</th></tr>
+            </thead>
+            <tbody>
+            <tr th:each="a : ${applications}">
+                <td th:text="${a.companyName}">Company</td>
+                <td th:text="${a.role}">Role</td>
+                <td th:text="${a.applicationDate}">date</td>
+                <td><span th:replace="~{fragments/status :: badge(${a.status})}"></span></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

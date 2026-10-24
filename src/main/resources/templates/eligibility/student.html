@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Eligible jobs')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <div th:replace="~{eligibility/tabs :: tabs('student')}"></div>
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <form th:action="@{/eligibility/student}" method="get" class="row g-2 align-items-end mb-4"
+          sec:authorize="hasRole('OFFICER')">
+        <div class="col-md-6">
+            <label for="studentId" class="form-label">Student</label>
+            <select id="studentId" name="studentId" class="form-select" required>
+                <option value="">Choose a student</option>
+                <option th:each="s : ${students}" th:value="${s.studentId}"
+                        th:text="${s.name + ' (' + s.registerNumber + ', ' + s.department + ')'}"
+                        th:selected="${s.studentId == selectedStudentId}">Student</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Find eligible jobs</button>
+        </div>
+    </form>
+
+    <th:block th:if="${student != null}">
+        <div class="card mb-3">
+            <div class="card-body py-2">
+                <strong th:text="${student.name}">Name</strong>
+                <span class="text-muted ms-2">
+                    <span th:text="${student.department}">CSE</span> ·
+                    CGPA <span th:text="${#numbers.formatDecimal(student.cgpa, 1, 2)}">8.00</span> ·
+                    Backlogs <span th:text="${student.backlogs}">0</span> ·
+                    Skills <span th:text="${#strings.isEmpty(student.skills)} ? '(none)' : ${student.skills}">Java</span>
+                </span>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(results)}" class="alert alert-info">No eligible jobs for this student.</div>
+
+        <div class="table-responsive" th:unless="${#lists.isEmpty(results)}">
+            <p class="text-muted mb-2">
+                <span th:text="${#lists.size(results)}">0</span> eligible job(s), most matching skills first.
+            </p>
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Company</th>
+                    <th>Role</th>
+                    <th class="text-end">Min CGPA</th>
+                    <th>Departments</th>
+                    <th class="text-end">Max backlogs</th>
+                    <th>Required skills</th>
+                    <th>Matched skills</th>
+                    <th class="text-end">Package (LPA)</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="r, stat : ${results}">
+                    <td th:text="${stat.count}">1</td>
+                    <td th:text="${companyNames[r.job.companyId]}">Company</td>
+                    <td th:text="${r.job.role}">Role</td>
+                    <td class="text-end" th:text="${#numbers.formatDecimal(r.job.minCgpa, 1, 2)}">7.00</td>
+                    <td th:text="${r.job.eligibleDepartments}">ALL</td>
+                    <td class="text-end" th:text="${r.job.maxBacklogs}">0</td>
+                    <td th:text="${#strings.isEmpty(r.job.requiredSkills)} ? '(none)' : ${r.job.requiredSkills}">Java</td>
+                    <td>
+                        <span th:if="${r.requiredSkills == 0}" class="text-muted">none required</span>
+                        <span th:unless="${r.requiredSkills == 0}" class="badge text-bg-success"
+                              th:text="${r.matchedSkills + ' of ' + r.requiredSkills}">1 of 2</span>
+                    </td>
+                    <td class="text-end" th:text="${#numbers.formatDecimal(r.job.packageLpa, 1, 2)}">6.00</td>
+                    <td class="text-end text-nowrap">
+                        <a th:href="@{/eligibility/explain(studentId=${student.studentId}, jobId=${r.job.jobId})}"
+                           class="btn btn-sm btn-outline-secondary">Explain</a>
+                        <th:block sec:authorize="hasRole('STUDENT')">
+                            <span th:if="${appliedJobIds.contains(r.job.jobId)}" class="badge text-bg-light border ms-1">Applied</span>
+                            <a th:unless="${appliedJobIds.contains(r.job.jobId)}"
+                               th:href="@{/applications/apply(jobId=${r.job.jobId})}" class="btn btn-sm btn-primary">Apply</a>
+                        </th:block>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </th:block>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

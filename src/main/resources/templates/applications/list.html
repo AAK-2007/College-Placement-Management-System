@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head('Applications')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: navbar}"></header>
+<main class="container">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1 class="h3 mb-0" sec:authorize="hasRole('STUDENT')">My applications</h1>
+        <h1 class="h3 mb-0" sec:authorize="!hasRole('STUDENT')">Applications</h1>
+        <a th:href="@{/applications/apply}" class="btn btn-primary" sec:authorize="hasRole('OFFICER')">New application</a>
+        <a th:href="@{/jobs}" class="btn btn-primary" sec:authorize="hasRole('STUDENT')">Find jobs to apply for</a>
+    </div>
+
+    <!-- Filters: the officer can filter by student or job; a company by one of its own jobs -->
+    <div class="row g-3 mb-3" sec:authorize="!hasRole('STUDENT')">
+        <form th:action="@{/applications}" method="get" class="col-md-6 row g-2 align-items-end"
+              sec:authorize="hasRole('OFFICER')">
+            <div class="col">
+                <label for="studentId" class="form-label">By student</label>
+                <select id="studentId" name="studentId" class="form-select">
+                    <option value="">All students</option>
+                    <option th:each="s : ${students}" th:value="${s.studentId}"
+                            th:text="${s.name + ' (' + s.registerNumber + ')'}"
+                            th:selected="${s.studentId == selectedStudentId}">Student</option>
+                </select>
+            </div>
+            <div class="col-auto"><button type="submit" class="btn btn-outline-primary">Show</button></div>
+        </form>
+        <form th:action="@{/applications}" method="get" class="col-md-6 row g-2 align-items-end">
+            <div class="col">
+                <label for="jobId" class="form-label">By job</label>
+                <select id="jobId" name="jobId" class="form-select">
+                    <option value="">All jobs</option>
+                    <option th:each="j : ${jobs}" th:value="${j.jobId}"
+                            th:text="${'#' + j.jobId + '  ' + companyNames[j.companyId] + ' - ' + j.role}"
+                            th:selected="${j.jobId == selectedJobId}">Job</option>
+                </select>
+            </div>
+            <div class="col-auto"><button type="submit" class="btn btn-outline-primary">Show</button></div>
+        </form>
+    </div>
+
+    <div th:if="${#lists.isEmpty(applications)}" class="alert alert-info">
+        <span sec:authorize="hasRole('STUDENT')">You have not applied to any job yet.</span>
+        <span sec:authorize="!hasRole('STUDENT')">No applications found.</span>
+    </div>
+
+    <div class="table-responsive" th:unless="${#lists.isEmpty(applications)}">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-light">
+            <tr>
+                <th>ID</th>
+                <th sec:authorize="!hasRole('STUDENT')">Student</th>
+                <th sec:authorize="!hasRole('STUDENT')">Register No.</th>
+                <th sec:authorize="!hasRole('COMPANY')">Company</th>
+                <th>Role</th>
+                <th>Applied on</th>
+                <th>Status</th>
+                <th class="text-end" sec:authorize="!hasRole('STUDENT')">Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="a : ${applications}">
+                <td th:text="${a.applicationId}">1</td>
+                <td sec:authorize="!hasRole('STUDENT')" th:text="${a.studentName}">Name</td>
+                <td sec:authorize="!hasRole('STUDENT')" th:text="${a.registerNumber}">REG</td>
+                <td sec:authorize="!hasRole('COMPANY')" th:text="${a.companyName}">Company</td>
+                <td th:text="${a.role}">Role</td>
+                <td th:text="${a.applicationDate}">2026-10-24</td>
+                <td><span th:replace="~{fragments/status :: badge(${a.status})}"></span></td>
+                <td class="text-end text-nowrap" sec:authorize="!hasRole('STUDENT')">
+                    <form th:if="${a.status.name() == 'APPLIED'}"
+                          th:action="@{/applications/{id}/shortlist(id=${a.applicationId})}" method="post" class="d-inline">
+                        <input type="hidden" name="studentId" th:value="${selectedStudentId}">
+                        <input type="hidden" name="jobId" th:value="${selectedJobId}">
+                        <button type="submit" class="btn btn-sm btn-outline-success">Shortlist</button>
+                    </form>
+                    <a th:href="@{/interviews/application/{id}(id=${a.applicationId})}"
+                       class="btn btn-sm btn-outline-secondary">Interviews</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

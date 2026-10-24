@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Eligible students')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <div th:replace="~{eligibility/tabs :: tabs('job')}"></div>
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <form th:action="@{/eligibility/job}" method="get" class="row g-2 align-items-end mb-4">
+        <div class="col-md-6">
+            <label for="jobId" class="form-label">Job</label>
+            <select id="jobId" name="jobId" class="form-select" required>
+                <option value="">Choose a job</option>
+                <option th:each="j : ${jobs}" th:value="${j.jobId}"
+                        th:text="${'#' + j.jobId + '  ' + companyNames[j.companyId] + ' - ' + j.role}"
+                        th:selected="${j.jobId == selectedJobId}">Job</option>
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-primary">Find eligible students</button>
+        </div>
+    </form>
+
+    <th:block th:if="${job != null}">
+        <div class="card mb-3">
+            <div class="card-body py-2">
+                <strong th:text="${companyNames[job.companyId] + ' - ' + job.role}">Company - Role</strong>
+                <span class="text-muted ms-2">
+                    Min CGPA <span th:text="${#numbers.formatDecimal(job.minCgpa, 1, 2)}">7.00</span> ·
+                    Max backlogs <span th:text="${job.maxBacklogs}">0</span> ·
+                    Departments <span th:text="${job.eligibleDepartments}">ALL</span> ·
+                    Skills <span th:text="${#strings.isEmpty(job.requiredSkills)} ? '(none)' : ${job.requiredSkills}">Java</span>
+                </span>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(results)}" class="alert alert-info">No eligible students for this job.</div>
+
+        <div class="table-responsive" th:unless="${#lists.isEmpty(results)}">
+            <p class="text-muted mb-2">
+                <span th:text="${#lists.size(results)}">0</span> eligible student(s), most matching skills first.
+            </p>
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Student</th>
+                    <th>Register No.</th>
+                    <th>Department</th>
+                    <th class="text-end">CGPA</th>
+                    <th class="text-end">Backlogs</th>
+                    <th>Skills</th>
+                    <th>Matched skills</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="r, stat : ${results}">
+                    <td th:text="${stat.count}">1</td>
+                    <td th:text="${r.student.name}">Name</td>
+                    <td th:text="${r.student.registerNumber}">REG</td>
+                    <td th:text="${r.student.department}">CSE</td>
+                    <td class="text-end" th:text="${#numbers.formatDecimal(r.student.cgpa, 1, 2)}">8.00</td>
+                    <td class="text-end" th:text="${r.student.backlogs}">0</td>
+                    <td th:text="${r.student.skills}">Java</td>
+                    <td>
+                        <span th:if="${r.requiredSkills == 0}" class="text-muted">none required</span>
+                        <span th:unless="${r.requiredSkills == 0}" class="badge text-bg-success"
+                              th:text="${r.matchedSkills + ' of ' + r.requiredSkills}">1 of 2</span>
+                    </td>
+                    <td class="text-end">
+                        <a th:href="@{/eligibility/explain(studentId=${r.student.studentId}, jobId=${job.jobId})}"
+                           class="btn btn-sm btn-outline-secondary">Explain</a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </th:block>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

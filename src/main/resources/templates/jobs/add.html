@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Add job')}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+<main class="container">
+    <div th:replace="~{fragments/layout :: alerts}"></div>
+
+    <h1 class="h3 mb-3">Add job opening</h1>
+
+    <div th:if="${#lists.isEmpty(companies)}" class="alert alert-warning">
+        There are no companies yet. <a th:href="@{/companies/add}">Add a company</a> first.
+    </div>
+
+    <form th:unless="${#lists.isEmpty(companies)}" th:action="@{/jobs/add}" th:object="${form}" method="post"
+          class="card card-body" novalidate>
+        <div class="row">
+            <!-- A company posts only for itself: show its name instead of a dropdown. -->
+            <div class="col-md-5 mb-3" sec:authorize="hasRole('COMPANY')">
+                <label class="form-label">Company</label>
+                <input type="text" class="form-control" th:value="${companies[0].name}" readonly>
+            </div>
+            <div class="col-md-5 mb-3" sec:authorize="hasRole('OFFICER')">
+                <label for="companyId" class="form-label">Company<span class="text-danger"> *</span></label>
+                <select th:field="*{companyId}" class="form-select"
+                        th:classappend="${errors?.containsKey('companyId')} ? 'is-invalid'">
+                    <option value="">Choose a company</option>
+                    <option th:each="c : ${companies}" th:value="${c.companyId}" th:text="${c.name}">Company</option>
+                </select>
+                <div class="invalid-feedback" th:if="${errors?.containsKey('companyId')}"
+                     th:text="${errors.get('companyId')}">Error</div>
+            </div>
+            <div class="col-md-7" th:insert="~{fragments/form :: input('role', 'Role / title', true, 'e.g. Software Engineer', null)}"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-3" th:insert="~{fragments/form :: input('minCgpa', 'Minimum CGPA', true, '0 - 10', null)}"></div>
+            <div class="col-md-3" th:insert="~{fragments/form :: input('maxBacklogs', 'Maximum backlogs', true, '0 or more', null)}"></div>
+            <div class="col-md-3" th:insert="~{fragments/form :: input('packageLpa', 'Package (LPA)', true, '0 - 1000', null)}"></div>
+        </div>
+        <div class="row">
+            <div class="col-md-6" th:insert="~{fragments/form :: input('eligibleDepartments', 'Eligible departments', true, 'e.g. CSE,IT or ALL', 'Comma-separated, or ALL for every department.')}"></div>
+            <div class="col-md-6" th:insert="~{fragments/form :: input('requiredSkills', 'Required skills', false, 'e.g. Java, SQL', 'Comma-separated. A student needs at least one. Leave empty for no skill requirement.')}"></div>
+        </div>
+        <div>
+            <button type="submit" class="btn btn-primary">Save job</button>
+            <a th:href="@{/jobs}" class="btn btn-link">Cancel</a>
+        </div>
+    </form>
+</main>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
