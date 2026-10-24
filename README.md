@@ -10,6 +10,7 @@ pooled MySQL connection.
   the **placement officer**, **students** and **companies**. Students and companies sign up
   themselves from the home page.
 - Default officer login: **`officer` / `Placement@2026`** — change it before real use ([how](#change-the-officer-login)).
+- To put it online, see **[DEPLOY.md](DEPLOY.md)** (Render + Aiven, free, using the `Dockerfile`).
 
 ---
 

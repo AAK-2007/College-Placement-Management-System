@@ -1,0 +1,14 @@
+# Keep the Docker build small and free of secrets.
+target/
+.git/
+.idea/
+.vscode/
+.claude/
+*.iml
+*.log
+.env
+.env.*
+*.env
+*.cnf
+Thumbs.db
+desktop.ini
