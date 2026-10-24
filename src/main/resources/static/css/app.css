@@ -285,6 +285,11 @@ main h2.h5, main h2.h6 {
     margin: 0 auto;
 }
 
+/* Sign-up forms: one column, a little wider than the login box */
+.auth-card.wide {
+    max-width: 40rem;
+}
+
 .section-note {
     color: var(--muted);
 }

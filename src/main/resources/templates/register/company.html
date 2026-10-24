@@ -1,43 +1,38 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('Company registration')}"></head>
+<head th:replace="~{fragments/layout :: head('Company sign up')}"></head>
 <body>
 <header th:replace="~{fragments/layout :: navbar}"></header>
 <main class="container">
-    <div th:replace="~{fragments/layout :: alerts}"></div>
+    <div class="auth-card wide mt-2">
+        <div th:replace="~{fragments/layout :: alerts}"></div>
 
-    <h1 class="h3 mb-1">Company registration</h1>
-    <p class="section-note">Register your company to post job openings and interview applicants. Fields marked * are required.</p>
+        <h1 class="h3 mb-1">Company sign up</h1>
+        <p class="section-note mb-3">
+            Already registered? <a th:href="@{/login}">Log in</a>
+        </p>
 
-    <form th:action="@{/register/company}" th:object="${form}" method="post" novalidate>
-        <div class="card mb-3">
-            <div class="card-header">Login details</div>
-            <div class="card-body">
+        <form th:action="@{/register/company}" th:object="${form}" method="post" class="card" novalidate>
+            <div class="card-body p-4">
+                <h2 class="h6 mb-3">Company details</h2>
+                <div th:insert="~{fragments/form :: field('name', 'Company name', true, null, null)}"></div>
+                <div th:insert="~{fragments/form :: field('sector', 'Sector (optional)', false, 'e.g. IT Services', null)}"></div>
                 <div class="row">
-                    <div class="col-md-4" th:insert="~{fragments/form :: input('username', 'User name', true, 'e.g. nimbus-hr', 'Letters, digits, dots, dashes or underscores.')}"></div>
-                    <div class="col-md-4" th:insert="~{fragments/form :: password('password', 'Password', 'At least 8 characters.')}"></div>
-                    <div class="col-md-4" th:insert="~{fragments/form :: password('confirmPassword', 'Confirm password', null)}"></div>
+                    <div class="col-sm-6" th:insert="~{fragments/form :: field('contactEmail', 'Contact email (optional)', false, null, null)}"></div>
+                    <div class="col-sm-6" th:insert="~{fragments/form :: field('contactPhone', 'Contact phone (optional)', false, null, null)}"></div>
                 </div>
+
+                <h2 class="h6 mt-2 mb-3">Login details</h2>
+                <div th:insert="~{fragments/form :: field('username', 'User name', true, 'e.g. nimbus-hr', null)}"></div>
+                <div class="row">
+                    <div class="col-sm-6" th:insert="~{fragments/form :: password('password', 'Password', 'At least 8 characters.')}"></div>
+                    <div class="col-sm-6" th:insert="~{fragments/form :: password('confirmPassword', 'Confirm password', null)}"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 mt-2">Create account</button>
             </div>
-        </div>
-
-        <div class="card mb-3">
-            <div class="card-header">Company details</div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6" th:insert="~{fragments/form :: input('name', 'Company name', true, null, null)}"></div>
-                    <div class="col-md-6" th:insert="~{fragments/form :: input('sector', 'Sector', false, 'e.g. IT Services', null)}"></div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6" th:insert="~{fragments/form :: input('contactEmail', 'Contact email', false, null, null)}"></div>
-                    <div class="col-md-6" th:insert="~{fragments/form :: input('contactPhone', 'Contact phone', false, null, null)}"></div>
-                </div>
-            </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Create account</button>
-        <a th:href="@{/}" class="btn btn-link">Cancel</a>
-    </form>
+        </form>
+    </div>
 </main>
 <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
 </body>

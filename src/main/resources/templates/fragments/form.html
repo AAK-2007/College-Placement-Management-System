@@ -8,7 +8,7 @@
   placeholder: hint text (on edit pages, the current value); help: small text under the field (or null).
   Shows the validator's message for this field from the "errors" map.
 -->
-<div th:fragment="input(name, label, required, placeholder, help)" class="mb-3">
+<div th:fragment="field(name, label, required, placeholder, help)" class="mb-3">
     <label th:for="${name}" class="form-label">
         <span th:text="${label}">Label</span><span th:if="${required}" class="text-danger"> *</span>
     </label>

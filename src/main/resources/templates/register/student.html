@@ -1,49 +1,46 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/layout :: head('Student registration')}"></head>
+<head th:replace="~{fragments/layout :: head('Student sign up')}"></head>
 <body>
 <header th:replace="~{fragments/layout :: navbar}"></header>
 <main class="container">
-    <div th:replace="~{fragments/layout :: alerts}"></div>
+    <div class="auth-card wide mt-2">
+        <div th:replace="~{fragments/layout :: alerts}"></div>
 
-    <h1 class="h3 mb-1">Student registration</h1>
-    <p class="section-note">Create your login and your placement profile. Fields marked * are required.</p>
+        <h1 class="h3 mb-1">Student sign up</h1>
+        <p class="section-note mb-3">
+            Already registered? <a th:href="@{/login}">Log in</a>
+        </p>
 
-    <form th:action="@{/register/student}" th:object="${form}" method="post" novalidate>
-        <div class="card mb-3">
-            <div class="card-header">Login details</div>
-            <div class="card-body">
+        <form th:action="@{/register/student}" th:object="${form}" method="post" class="card" novalidate>
+            <div class="card-body p-4">
+                <h2 class="h6 mb-3">Your details</h2>
+                <div th:insert="~{fragments/form :: field('name', 'Full name', true, null, null)}"></div>
                 <div class="row">
-                    <div class="col-md-4" th:insert="~{fragments/form :: input('username', 'User name', true, 'e.g. ananya.rao', 'Letters, digits, dots, dashes or underscores.')}"></div>
-                    <div class="col-md-4" th:insert="~{fragments/form :: password('password', 'Password', 'At least 8 characters.')}"></div>
-                    <div class="col-md-4" th:insert="~{fragments/form :: password('confirmPassword', 'Confirm password', null)}"></div>
+                    <div class="col-sm-7" th:insert="~{fragments/form :: field('registerNumber', 'Register number', true, 'e.g. 21CS001', null)}"></div>
+                    <div class="col-sm-5" th:insert="~{fragments/form :: field('department', 'Department', true, 'e.g. CSE', null)}"></div>
                 </div>
+                <div class="row">
+                    <div class="col-6" th:insert="~{fragments/form :: field('cgpa', 'CGPA', true, '0 - 10', null)}"></div>
+                    <div class="col-6" th:insert="~{fragments/form :: field('backlogs', 'Backlogs', true, '0 if none', null)}"></div>
+                </div>
+                <div th:insert="~{fragments/form :: field('skills', 'Skills (optional)', false, 'e.g. Java, SQL, Python', null)}"></div>
+                <div class="row">
+                    <div class="col-sm-6" th:insert="~{fragments/form :: field('email', 'Email (optional)', false, null, null)}"></div>
+                    <div class="col-sm-6" th:insert="~{fragments/form :: field('phone', 'Phone (optional)', false, null, null)}"></div>
+                </div>
+
+                <h2 class="h6 mt-2 mb-3">Login details</h2>
+                <div th:insert="~{fragments/form :: field('username', 'User name', true, 'e.g. ananya.rao', null)}"></div>
+                <div class="row">
+                    <div class="col-sm-6" th:insert="~{fragments/form :: password('password', 'Password', 'At least 8 characters.')}"></div>
+                    <div class="col-sm-6" th:insert="~{fragments/form :: password('confirmPassword', 'Confirm password', null)}"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 mt-2">Create account</button>
             </div>
-        </div>
-
-        <div class="card mb-3">
-            <div class="card-header">Academic profile</div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-4" th:insert="~{fragments/form :: input('registerNumber', 'Register number', true, 'e.g. 21CS001', null)}"></div>
-                    <div class="col-md-5" th:insert="~{fragments/form :: input('name', 'Full name', true, null, null)}"></div>
-                    <div class="col-md-3" th:insert="~{fragments/form :: input('department', 'Department', true, 'e.g. CSE', null)}"></div>
-                </div>
-                <div class="row">
-                    <div class="col-md-3" th:insert="~{fragments/form :: input('cgpa', 'CGPA', true, '0 - 10', null)}"></div>
-                    <div class="col-md-3" th:insert="~{fragments/form :: input('backlogs', 'Backlogs', true, '0 or more', null)}"></div>
-                    <div class="col-md-6" th:insert="~{fragments/form :: input('skills', 'Skills', false, 'e.g. Java, SQL, Python', 'Comma-separated.')}"></div>
-                </div>
-                <div class="row">
-                    <div class="col-md-6" th:insert="~{fragments/form :: input('email', 'Email', false, null, null)}"></div>
-                    <div class="col-md-6" th:insert="~{fragments/form :: input('phone', 'Phone', false, null, null)}"></div>
-                </div>
-            </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Create account</button>
-        <a th:href="@{/}" class="btn btn-link">Cancel</a>
-    </form>
+        </form>
+    </div>
 </main>
 <th:block th:replace="~{fragments/layout :: scripts}"></th:block>
 </body>

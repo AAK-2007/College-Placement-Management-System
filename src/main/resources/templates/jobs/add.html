@@ -30,16 +30,16 @@
                 <div class="invalid-feedback" th:if="${errors?.containsKey('companyId')}"
                      th:text="${errors.get('companyId')}">Error</div>
             </div>
-            <div class="col-md-7" th:insert="~{fragments/form :: input('role', 'Role / title', true, 'e.g. Software Engineer', null)}"></div>
+            <div class="col-md-7" th:insert="~{fragments/form :: field('role', 'Role / title', true, 'e.g. Software Engineer', null)}"></div>
         </div>
         <div class="row">
-            <div class="col-md-3" th:insert="~{fragments/form :: input('minCgpa', 'Minimum CGPA', true, '0 - 10', null)}"></div>
-            <div class="col-md-3" th:insert="~{fragments/form :: input('maxBacklogs', 'Maximum backlogs', true, '0 or more', null)}"></div>
-            <div class="col-md-3" th:insert="~{fragments/form :: input('packageLpa', 'Package (LPA)', true, '0 - 1000', null)}"></div>
+            <div class="col-md-3" th:insert="~{fragments/form :: field('minCgpa', 'Minimum CGPA', true, '0 - 10', null)}"></div>
+            <div class="col-md-3" th:insert="~{fragments/form :: field('maxBacklogs', 'Maximum backlogs', true, '0 or more', null)}"></div>
+            <div class="col-md-3" th:insert="~{fragments/form :: field('packageLpa', 'Package (LPA)', true, '0 - 1000', null)}"></div>
         </div>
         <div class="row">
-            <div class="col-md-6" th:insert="~{fragments/form :: input('eligibleDepartments', 'Eligible departments', true, 'e.g. CSE,IT or ALL', 'Comma-separated, or ALL for every department.')}"></div>
-            <div class="col-md-6" th:insert="~{fragments/form :: input('requiredSkills', 'Required skills', false, 'e.g. Java, SQL', 'Comma-separated. A student needs at least one. Leave empty for no skill requirement.')}"></div>
+            <div class="col-md-6" th:insert="~{fragments/form :: field('eligibleDepartments', 'Eligible departments', true, 'e.g. CSE,IT or ALL', 'Comma-separated, or ALL for every department.')}"></div>
+            <div class="col-md-6" th:insert="~{fragments/form :: field('requiredSkills', 'Required skills', false, 'e.g. Java, SQL', 'Comma-separated. A student needs at least one. Leave empty for no skill requirement.')}"></div>
         </div>
         <div>
             <button type="submit" class="btn btn-primary">Save job</button>
